@@ -6,9 +6,9 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"fmt"
-	"strings"
 )
 
 type Translate struct {
@@ -43,7 +43,7 @@ func (t *Translate) doSend(method, urlStr string, body []byte, isJson bool) ([]b
 
 	if isJson {
 		if !strings.Contains(strings.ToLower(resp.Header.Get("Content-Type")), "application/json") {
-			return nil, fmt.Errorf("返回数据格式包非json格式。")
+			return nil, fmt.Errorf("content-type not json: %s", resp.Header.Get("Content-Type"))
 		}
 	}
 
