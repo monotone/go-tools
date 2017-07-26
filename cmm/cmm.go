@@ -3,10 +3,14 @@ package cmm
 import (
 	"crypto/md5"
 	"encoding/hex"
+	"fmt"
 	"net"
 	"os"
+	"os/exec"
 	"path"
 	"strings"
+
+	"github.com/pkg/errors"
 )
 
 // Md5Hex 获取对bs进行md5后的hex值
@@ -77,4 +81,18 @@ func GetPhysicsInterfaces() []net.Interface {
 	}
 
 	return phs
+}
+
+// NohupRun 以nohup 形式执行命令
+func NohupRun(cmd string) error {
+	nohup := exec.Command("sh", "-c", fmt.Sprintf("nohup %s", cmd))
+	if nohup == nil {
+		return errors.New("make nohup command failed")
+	}
+
+	err := nohup.Run()
+	if err != nil {
+		return errors.Wrap(err, "run hohup failed")
+	}
+	return nil
 }
