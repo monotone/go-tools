@@ -88,7 +88,7 @@ func GetPhysicsInterfaces() []net.Interface {
 
 // NohupRun 以nohup 形式执行命令
 func NohupRun(cmd string) error {
-	nohup := exec.Command("sh", "-c", fmt.Sprintf("nohup %s", cmd))
+	nohup := exec.Command("sh", "-c", fmt.Sprintf("nohup %s &", cmd))
 	if nohup == nil {
 		return errors.New("make nohup command failed")
 	}
@@ -100,46 +100,53 @@ func NohupRun(cmd string) error {
 	return nil
 }
 
-// UnZipTar 解压tar.gz文件
-func UnZipTar(filename, dstFolder string) error {
+// UnZipTar 解压tar.gz文件。成功返回解压出的顶级文件夹名称
+func UnZipTar(filename, dstFolder string) (string, error) {
 	// file read
 	fr, err := os.Open(filename)
 	if err != nil {
-		return err
+		return "", errors.Wrap(err, "open file failed")
 	}
 	defer fr.Close()
 
 	// gzip read
 	gr, err := gzip.NewReader(fr)
 	if err != nil {
-		return err
+		return "", errors.Wrap(err, "read file failed")
 	}
 	defer gr.Close()
 
 	err = os.MkdirAll(dstFolder, 0755)
 	if err != nil {
-		return err
+		return "", errors.Wrap(err, "make directory for destination folder failed")
 	}
 
 	// tar read
 	tr := tar.NewReader(gr)
 
 	// 读取文件
+	rootDirName := ""
 	for {
 		var h *tar.Header
 		h, err = tr.Next()
 		if err == io.EOF {
+			err = nil
 			break
 		}
 		if err != nil {
+			err = errors.Wrap(err, "read from zip file failed")
 			break
 		}
 
 		name := path.Clean(h.Name)
 
 		if h.FileInfo().IsDir() {
+			if len(rootDirName) == 0 {
+				rootDirName = name
+			}
 			err = os.MkdirAll(dstFolder+"/"+name+"/", 0755)
 			if err != nil {
+				err = errors.Wrap(err, "make directory for unzip file failed")
 				break
 			}
 			continue
@@ -149,15 +156,19 @@ func UnZipTar(filename, dstFolder string) error {
 		var fw *os.File
 		fw, err = os.Create(dstFolder + "/" + name)
 		if err != nil {
+			err = errors.Wrap(err, "create unzip file failed")
 			break
 		}
 		_, err = io.Copy(fw, tr)
 		fw.Close()
 		if err != nil {
+			err = errors.Wrap(err, "write unzip file failed")
 			break
 		}
 	}
 
-	return err
-
+	if err != nil {
+		return "", err
+	}
+	return rootDirName, err
 }
