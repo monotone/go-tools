@@ -1,9 +1,12 @@
 package cmm
 
 import (
+	"archive/tar"
+	"compress/gzip"
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
+	"io"
 	"net"
 	"os"
 	"os/exec"
@@ -95,4 +98,66 @@ func NohupRun(cmd string) error {
 		return errors.Wrap(err, "run hohup failed")
 	}
 	return nil
+}
+
+// UnZipTar 解压tar.gz文件
+func UnZipTar(filename, dstFolder string) error {
+	// file read
+	fr, err := os.Open(filename)
+	if err != nil {
+		return err
+	}
+	defer fr.Close()
+
+	// gzip read
+	gr, err := gzip.NewReader(fr)
+	if err != nil {
+		return err
+	}
+	defer gr.Close()
+
+	err = os.MkdirAll(dstFolder, 0755)
+	if err != nil {
+		return err
+	}
+
+	// tar read
+	tr := tar.NewReader(gr)
+
+	// 读取文件
+	for {
+		var h *tar.Header
+		h, err = tr.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			break
+		}
+
+		name := path.Clean(h.Name)
+
+		if h.FileInfo().IsDir() {
+			err = os.MkdirAll(dstFolder+"/"+name+"/", 0755)
+			if err != nil {
+				break
+			}
+			continue
+		}
+
+		// 写文件
+		var fw *os.File
+		fw, err = os.Create(dstFolder + "/" + name)
+		if err != nil {
+			break
+		}
+		_, err = io.Copy(fw, tr)
+		fw.Close()
+		if err != nil {
+			break
+		}
+	}
+
+	return err
+
 }
