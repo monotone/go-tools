@@ -105,7 +105,7 @@ func UnZipTar(filename, dstFolder string) (string, error) {
 	// file read
 	fr, err := os.Open(filename)
 	if err != nil {
-		return "", errors.Wrap(err, "open file failed")
+		return "", err
 	}
 	defer fr.Close()
 
@@ -127,14 +127,12 @@ func UnZipTar(filename, dstFolder string) (string, error) {
 	// 读取文件
 	rootDirName := ""
 	for {
-		var h *tar.Header
-		h, err = tr.Next()
-		if err == io.EOF {
-			err = nil
+		h, e := tr.Next()
+		if e == io.EOF {
 			break
 		}
-		if err != nil {
-			err = errors.Wrap(err, "read from zip file failed")
+		if e != nil {
+			err = errors.Wrap(e, "read from zip file failed")
 			break
 		}
 
@@ -144,25 +142,24 @@ func UnZipTar(filename, dstFolder string) (string, error) {
 			if len(rootDirName) == 0 {
 				rootDirName = name
 			}
-			err = os.MkdirAll(dstFolder+"/"+name+"/", 0755)
-			if err != nil {
-				err = errors.Wrap(err, "make directory for unzip file failed")
+			e = os.MkdirAll(dstFolder+"/"+name+"/", 0755)
+			if e != nil {
+				err = errors.Wrap(e, "make directory for unzip file failed")
 				break
 			}
 			continue
 		}
 
 		// 写文件
-		var fw *os.File
-		fw, err = os.Create(dstFolder + "/" + name)
-		if err != nil {
-			err = errors.Wrap(err, "create unzip file failed")
+		fw, e := os.OpenFile(dstFolder+"/"+name, os.O_RDWR|os.O_CREATE|os.O_EXCL, h.FileInfo().Mode())
+		if e != nil {
+			err = errors.Wrap(e, "create unzip file failed")
 			break
 		}
-		_, err = io.Copy(fw, tr)
+		_, e = io.Copy(fw, tr)
 		fw.Close()
-		if err != nil {
-			err = errors.Wrap(err, "write unzip file failed")
+		if e != nil {
+			err = errors.Wrap(e, "write unzip file failed")
 			break
 		}
 	}

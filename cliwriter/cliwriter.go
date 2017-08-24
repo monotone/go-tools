@@ -33,42 +33,49 @@ func ResetColor() {
 }
 
 func Errorf(format string, args ...interface{}) {
-	errWriter.Fprintf(os.Stderr, ErrorPrefix+format, args)
+	errWriter.Fprintf(os.Stderr, ErrorPrefix+format, args...)
 }
-func Error(content string) {
-	errWriter.Fprint(os.Stderr, ErrorPrefix+content)
+func Error(args ...interface{}) {
+	errWriter.Fprint(os.Stderr, ErrorPrefix)
+	errWriter.Fprint(os.Stderr, args...)
 }
-func Errorln(content string) {
-	errWriter.Fprintln(os.Stderr, ErrorPrefix+content)
+func Errorln(args ...interface{}) {
+	errWriter.Fprint(os.Stderr, ErrorPrefix)
+	errWriter.Fprintln(os.Stderr, args...)
 }
+
 func Infof(format string, args ...interface{}) {
-	fmt.Printf(format, args)
+	fmt.Printf(format, args...)
 }
-func Info(content string) {
-	fmt.Print(content)
+func Info(args ...interface{}) {
+	fmt.Print(args...)
 }
-func Infoln(content string) {
-	fmt.Println(content)
+func Infoln(args ...interface{}) {
+	fmt.Println(args...)
 }
 
 func Tipf(format string, args ...interface{}) {
-	tipWriter.Fprintf(os.Stdout, TipPrefix+format, args)
+	tipWriter.Fprintf(os.Stdout, TipPrefix+format, args...)
 }
-func Tip(content string) {
-	tipWriter.Fprint(os.Stdout, TipPrefix+content)
+func Tip(args ...interface{}) {
+	tipWriter.Fprint(os.Stderr, TipPrefix)
+	tipWriter.Fprint(os.Stderr, args...)
 }
-func Tipln(content string) {
-	tipWriter.Fprintln(os.Stdout, TipPrefix+content)
+func Tipln(args ...interface{}) {
+	tipWriter.Fprint(os.Stderr, TipPrefix)
+	tipWriter.Fprintln(os.Stderr, args...)
 }
 
 func Successf(format string, args ...interface{}) {
-	successWriter.Fprintf(os.Stdout, SuccessPrefix+format, args)
+	successWriter.Fprintf(os.Stdout, SuccessPrefix+format, args...)
 }
 
-func Success(content string) {
-	successWriter.Fprint(os.Stdout, SuccessPrefix+content)
+func Success(args ...interface{}) {
+	successWriter.Fprint(os.Stderr, SuccessPrefix)
+	successWriter.Fprint(os.Stderr, args...)
 }
 
-func Successln(content string) {
-	successWriter.Fprintln(os.Stdout, SuccessPrefix+content)
+func Successln(args ...interface{}) {
+	successWriter.Fprint(os.Stderr, SuccessPrefix)
+	successWriter.Fprintln(os.Stderr, args...)
 }

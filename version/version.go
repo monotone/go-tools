@@ -46,8 +46,8 @@ func PrintVersionInfo(ws ...io.Writer) {
 	if len(ws) > 0 {
 		writer = ws[0]
 	}
-	writer.Write([]byte(fmt.Sprintln("Build time\t\t:", BuildTime)))
-	writer.Write([]byte(fmt.Sprintln("Hash code \t\t:", GitHash)))
-	writer.Write([]byte(fmt.Sprintln("Version number\t\t:", Version)))
-	writer.Write([]byte(fmt.Sprintln("Go Version Info\t\t:", runtime.Version())))
+	writer.Write([]byte(fmt.Sprintln("Build time	 \t:", BuildTime)))
+	writer.Write([]byte(fmt.Sprintln("Hash code 	 \t:", GitHash)))
+	writer.Write([]byte(fmt.Sprintln("Version number 	\t:", Version)))
+	writer.Write([]byte(fmt.Sprintln("Go Version Info	\t:", runtime.Version())))
 }
