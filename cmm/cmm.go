@@ -47,8 +47,8 @@ func GetPhysicsInterfaces() []net.Interface {
 			continue
 		}
 
-		// 名称过滤，支持em*, eth*
-		if !strings.HasPrefix(i.Name, "em") && !strings.HasPrefix(i.Name, "eth") {
+		// 名称过滤，支持em*, eth*, eno*
+		if !strings.HasPrefix(i.Name, "em") && !strings.HasPrefix(i.Name, "eth") && !strings.HasPrefix(i.Name, "eno") {
 			continue
 		}
 
