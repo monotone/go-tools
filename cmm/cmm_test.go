@@ -2,13 +2,15 @@ package cmm
 
 import (
 	"fmt"
+	"os"
 	"reflect"
 	"testing"
 	"unsafe"
 )
 
 func TestUnZipTar(t *testing.T) {
-	fmt.Println(UnZipTar("./test.tar.gz", "./"))
+	os.RemoveAll("./test")
+	fmt.Println(UnZipTar("./testdata/test.tar.gz", "./"))
 }
 
 func CArrayToGoSlice(begin uintptr, size int) []byte {

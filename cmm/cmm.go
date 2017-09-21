@@ -101,6 +101,7 @@ func NohupRun(cmd string) error {
 }
 
 // UnZipTar 解压tar.gz文件。成功返回解压出的顶级文件夹名称
+// NOTE: 存在解压出的符号文件失效的问题
 func UnZipTar(filename, dstFolder string) (string, error) {
 	// file read
 	fr, err := os.Open(filename)

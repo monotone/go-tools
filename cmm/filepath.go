@@ -4,7 +4,7 @@ import "os"
 import "path"
 
 func FileExist(filepath string) bool {
-	stat, err := os.Stat(filepath)
+	stat, err := os.Lstat(filepath)
 	if err == nil && stat != nil {
 		return true
 	}
