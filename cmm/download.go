@@ -51,7 +51,8 @@ func Download(urlStr string) (string, error) {
 // DownloadToDir 下载指定urlStr的内容到指定目录下，文件名从urlStr末尾获取
 func DownloadToDir(urlStr, dir string) (string, error) {
 	_, filename := path.Split(urlStr)
-	filename = dir + filename
+	filename = path.Join(dir, filename)
+	os.MkdirAll(dir, 0755)
 	return filename, DownloadToFile(urlStr, filename)
 }
 
