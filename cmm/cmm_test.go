@@ -21,3 +21,7 @@ func CArrayToGoSlice(begin uintptr, size int) []byte {
 	sliceHeader.Data = begin
 	return theGoSlice
 }
+
+func TestGetPhysicsInterfaces(t *testing.T) {
+	fmt.Println(GetPhysicsInterfaces(true))
+}

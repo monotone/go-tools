@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
 )
 
 // Md5Hex 获取对bs进行md5后的hex值
@@ -36,10 +37,10 @@ func GetWorkDir() string {
 	return path.Dir(ex)
 }
 
-// GetPhysicsInterfaces 获取当前机器的物理网卡
-func GetPhysicsInterfaces() []net.Interface {
+// GetPhysicsInterfaces 获取当前机器的物理网卡，ipOnly决策是否只返回有IP的网络接口
+func GetPhysicsInterfaces(ipOnly ...bool) []net.Interface {
 	// 记录当前的物理网卡
-	phs := make([]net.Interface, 0)
+	var phs []net.Interface
 	faces, _ := net.Interfaces()
 	// 过滤出物理网卡
 	for _, i := range faces {
@@ -47,10 +48,10 @@ func GetPhysicsInterfaces() []net.Interface {
 			continue
 		}
 
-		// 名称过滤，支持em*, eth*, eno*
-		if !strings.HasPrefix(i.Name, "em") && !strings.HasPrefix(i.Name, "eth") && !strings.HasPrefix(i.Name, "eno") {
-			continue
-		}
+		// // 名称过滤，支持em*, eth*, eno*
+		// if !strings.HasPrefix(i.Name, "em") && !strings.HasPrefix(i.Name, "eth") && !strings.HasPrefix(i.Name, "eno") {
+		// 	continue
+		// }
 
 		// 检查硬件地址第二位十六进制数，如果不为偶数则不是单播地址
 		if len(i.HardwareAddr.String()) < 2 || !strings.Contains("02468ACEace", string(i.HardwareAddr.String()[1])) {
@@ -61,25 +62,28 @@ func GetPhysicsInterfaces() []net.Interface {
 			continue
 		}
 
-		phs = append(phs, i)
+		// 只增加有IP的网络接口
+		if len(ipOnly) == 0 {
+			phs = append(phs, i)
+		} else {
+			addrs, err := i.Addrs()
+			if err != nil {
+				logrus.Errorln("net.interfaces.addrs return Error: " + err.Error())
+				continue
+			}
 
-		// addrs, err := i.Addrs()
-		// if err != nil {
-		// 	logrus.Errorln("net.interfaces.addrs return Error: " + err.Error())
-		// } else {
+			for _, a := range addrs {
+				if ipnet, ok := a.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+					ip4 := ipnet.IP.To4()
+					if ip4 == nil {
+						continue
+					}
 
-		// 	fmt.Println(i, addrs)
-		// 	for _, a := range addrs {
-		// 		if ipnet, ok := a.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
-		// 			ip4 := ipnet.IP.To4()
-		// 			if ip4 == nil {
-		// 				continue
-		// 			}
-
-		// 			phs = append(phs, i)
-		// 		}
-		// 	}
-		// }
+					phs = append(phs, i)
+					break
+				}
+			}
+		}
 
 	}
 
