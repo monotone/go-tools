@@ -20,6 +20,10 @@ func DownloadToFile(urlStr, filename string) error {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		return errors.New("resp status code not 200 : " + resp.Status)
+	}
+
 	// 准备好目标文件
 	f, err := os.OpenFile(filename, os.O_RDWR|os.O_EXCL|os.O_CREATE, 0644)
 	if err != nil {
